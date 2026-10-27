@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#e7f5ef">
-<title>Devemcamadas · Painel de estudos</title>
+<title>CariocaCode · Painel de estudos</title>
 <style>
 :root{--mint:#dff3eb;--mint2:#b8e3d2;--green:#32745f;--green2:#245845;--lilac:#eee7fb;--lilac2:#d7c8f3;--ink:#26352f;--muted:#718078;--paper:#fbfdfb;--line:#e4ece7;--white:#fff;--rose:#f8e8ec;--shadow:0 10px 30px rgba(40,80,62,.07)}
 *{box-sizing:border-box}body{margin:0;background:#f5faf7;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
@@ -16,7 +16,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1
 <body>
 <div class="app">
 <header class="topbar">
-  <div class="brand"><div class="logo">✦</div><div><h1>Devemcamadas</h1><p>Seu progresso, camada por camada.</p></div></div>
+  <div class="brand"><div class="logo">✦</div><div><h1>CariocaCode</h1><p>Seu progresso, camada por camada.</p></div></div>
   <div class="top-actions"><span class="pill" id="contestPill">🎯 Transpetro · Analista de Sistemas</span><button class="button ghost" id="exportBtn">Exportar dados</button><button class="button secondary" id="importBtn">Importar backup</button><input type="file" id="importFile" accept="application/json" class="hidden"></div>
 </header>
 <section class="hero">
@@ -89,7 +89,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1
     </section>
   </aside>
 </div>
-<footer class="foot">Devemcamadas · feito para estudar com constância, não com perfeição ✦</footer>
+<footer class="foot">CariocaCode · tecnologia, código e novos horizontes ✦</footer>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -103,7 +103,7 @@ const DAYS=[
  {name:"Domingo",short:"DOM",tasks:[["Banco de Dados","Questões e revisão dos erros","60 min"],["Revisão de Específicas","Engenharia de Software, projetos e BPM: questões","60 min"],["Lógica e Algoritmos","Lógica matemática, algoritmos e questões mistas","60 min"]]}
 ];
 const SUBJECTS=["Banco de Dados","Engenharia de Software","Segurança da Informação","Gerência de Projetos","Processos de Negócio (BPM)","Arquitetura e Algoritmos","Lógica e Algoritmos","Português","Inglês","Revisão de Específicas","Outra"];
-const STORE="devemcamadas.study.v1";
+const STORE="cariocacode.study.v1";
 const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const weekStart=(date=new Date())=>{const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-(d.getDay()+6)%7);return d.toISOString().slice(0,10)};
 const addDays=(iso,n)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
@@ -131,7 +131,7 @@ document.getElementById("qTotal").oninput=()=>{document.getElementById("qCorrect
 document.getElementById("errorForm").onsubmit=e=>{e.preventDefault();state.errors.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),subject:document.getElementById("eSubject").value,topic:document.getElementById("eTopic").value.trim(),why:document.getElementById("eWhy").value.trim(),fix:document.getElementById("eFix").value.trim(),date:todayISO(),done:false,note:""});e.target.reset();save();toast("Erro adicionado à lista de revisão.")};
 document.getElementById("contestForm").onsubmit=e=>{e.preventDefault();state.contest={name:document.getElementById("contestName").value.trim(),role:document.getElementById("contestRole").value.trim(),date:document.getElementById("examDate").value};save();toast("Concurso atualizado!")};
 document.getElementById("resetWeekBtn").onclick=()=>{if(confirm("Desmarcar as atividades desta semana? Seus registros de questões e erros serão mantidos.")){Object.keys(state.completed).filter(k=>k.startsWith(state.week+":")).forEach(k=>delete state.completed[k]);save();toast("Checklist semanal reiniciado.")}};
-document.getElementById("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="devemcamadas-backup-"+todayISO()+".json";a.click();URL.revokeObjectURL(url);toast("Backup exportado.")};
+document.getElementById("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="cariocacode-backup-"+todayISO()+".json";a.click();URL.revokeObjectURL(url);toast("Backup exportado.")};
 document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
 document.getElementById("importFile").onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const imported=JSON.parse(await file.text());if(!imported||!Array.isArray(imported.records)||!Array.isArray(imported.errors)||typeof imported.completed!=="object")throw Error();if(confirm("Importar este backup e substituir os dados atuais deste navegador?")){state={...blankState(),...imported,contest:{...blankState().contest,...(imported.contest||{})}};state.week=weekStart();save();toast("Backup importado.")}}catch{alert("Não foi possível importar. Selecione um backup JSON exportado pelo Devemcamadas.")}e.target.value=""};
 document.getElementById("clearDataBtn").onclick=()=>{if(confirm("Isso apagará permanentemente os registros salvos neste navegador. Exporte um backup antes, se quiser guardá-los. Continuar?")){state=blankState();selectedDay=Math.min(6,(new Date().getDay()+6)%7);save();toast("Dados apagados.")}};

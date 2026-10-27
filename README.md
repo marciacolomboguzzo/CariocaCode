@@ -1,6 +1,6 @@
-# Devemcamadas — Painel de Estudos
+# CariocaCode — Painel de Estudos
 
-Aplicação web estática para organizar a preparação para concursos.
+Aplicação web estática para organizar a preparação para concursos, com cronograma semanal, checklist, registro de questões, desempenho por disciplina e revisão de erros.
 
 ## Executar no computador
 1. Extraia o arquivo ZIP.
@@ -9,11 +9,10 @@ Aplicação web estática para organizar a preparação para concursos.
 
 ## Publicar gratuitamente
 Você pode usar GitHub Pages:
-1. Crie um repositório no GitHub.
-2. Envie o arquivo `index.html` para a raiz do repositório.
-3. Abra **Settings → Pages**.
-4. Em **Build and deployment**, selecione **Deploy from a branch**, escolha a branch `main` e a pasta `/ (root)`.
-5. Salve e aguarde o endereço público aparecer na tela do GitHub Pages.
+1. Envie `index.html` para a raiz do repositório GitHub `cariocacode`.
+2. Abra **Settings → Pages**.
+3. Em **Build and deployment**, selecione **Deploy from a branch**, escolha a branch `main` e a pasta `/ (root)`.
+4. Salve e aguarde o endereço público aparecer na tela do GitHub Pages.
 
 ## Atenção aos dados
 - O armazenamento é local por navegador/dispositivo; não sincroniza automaticamente.
