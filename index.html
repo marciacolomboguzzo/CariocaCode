@@ -37,6 +37,18 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1
       <div class="day-heading"><h4 id="selectedDayTitle">Segunda-feira</h4><span id="dayStatus">0 de 3 concluídos</span></div>
       <div id="taskList"></div>
     </section>
+
+    <section class="panel" id="dbPlanPanel">
+      <div class="panel-title"><div><h3>🗂️ Banco de Dados · plano Transpetro</h3><p>Aulas do Estratégia por tópico, exercícios com foco definido e mapas mentais para a revisão.</p></div><span class="pill">27/10–05/12</span></div>
+      <div class="notice"><b>Fase 1 — até 25/11:</b> concluir a teoria e as questões de fixação de cada tópico. <b>Fase 2 — 26/11 a 04/12:</b> somente exercícios, simulados curtos e revisão de erros. <b>04/12:</b> revisão dos mapas mentais. <b>05/12:</b> assistir à revisão de véspera do Estratégia.</div>
+      <div class="metrics" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">
+        <div class="metric"><div class="metric-head">Tópicos concluídos</div><div class="metric-value" id="dbDone">0/14</div><div class="metric-sub">Aulas 00 a 13</div></div>
+        <div class="metric"><div class="metric-head">Exercícios concluídos</div><div class="metric-value" id="dbExDone">0/9</div><div class="metric-sub">26/11 a 04/12</div></div>
+        <div class="metric"><div class="metric-head">Mapas anexados</div><div class="metric-value" id="dbMaps">0</div><div class="metric-sub">Arquivos guardados neste navegador</div></div>
+      </div>
+      <div class="field" style="margin-bottom:12px"><label for="dbFilter">Filtrar planejamento</label><select id="dbFilter"><option value="all">Todos os dias</option><option value="theory">Teoria até 25/11</option><option value="exercise">Exercícios 26/11–04/12</option><option value="review">Revisão final e véspera</option></select></div>
+      <div id="dbPlanList"></div>
+    </section>
     <section class="panel">
       <div class="panel-title"><div><h3>✍️ Registrar questões</h3><p>Registre os resultados para medir sua evolução por disciplina.</p></div></div>
       <div class="notice">Dica: registre cada bloco de exercícios depois de corrigir as questões. Se errar, adicione o motivo à sua revisão de erros.</div>
@@ -89,10 +101,74 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1
     </section>
   </aside>
 </div>
-<footer class="foot">CariocaCode · tecnologia, código e novos horizontes ✦</footer>
+<footer class="foot">CariocaCode · feito para estudar com constância, não com perfeição ✦</footer>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
+
+const DB_PLAN=[
+['2026-10-27','theory','Aula 00 — Dados, informação e teoria da informação','Dados estruturados, semiestruturados e não estruturados; diferença entre dado, informação e conhecimento.','Fixação: 10 questões sobre tipos de dados e conceitos de informação.'],
+['2026-10-28','theory','Aula 01 — Fundamentos de Banco de Dados','SGBD, banco de dados, papéis do DBA/AD, arquitetura ANSI/SPARC e independência de dados.','Fixação: 10 questões sobre SGBD, arquitetura e funções do DBA.'],
+['2026-10-29','theory','Aula 01 — Transações e ACID','Atomicidade, consistência, isolamento e durabilidade; transações e concorrência.','Fixação: 10 questões identificando cada propriedade ACID em cenários.'],
+['2026-10-30','theory','Aula 02 — Modelo Entidade-Relacionamento (MER)','Entidades, atributos simples/compostos, identificadores, relacionamentos e cardinalidades.','Fixação: 12 questões de leitura de DER, cardinalidade e participação.'],
+['2026-10-31','theory','Aula 02 — MER: casos e mapeamento','Entidade fraca, atributos multivalorados, relacionamentos 1:1, 1:N e N:N.','Fixação: 10 questões de modelagem e conversão de relacionamentos.'],
+['2026-11-01','theory','Aula 03 — Modelo Relacional','Relação, tupla, atributo, domínio, grau, cardinalidade e valores NULL.','Fixação: 10 questões de conceitos do modelo relacional.'],
+['2026-11-02','theory','Aula 03 — Chaves e integridade','Superchave, chave candidata, PK, FK, UNIQUE, integridade de entidade e referencial.','Fixação: 12 questões sobre chaves, restrições e integridade.'],
+['2026-11-03','theory','Aula 03 — Álgebra relacional e mapeamento','Seleção, projeção, união, diferença, produto cartesiano, junção e mapeamento MER-relacional.','Fixação: 12 questões distinguindo operações relacionais e seus resultados.'],
+['2026-11-04','theory','Aula 04 — Normalização e 1FN','Redundância, anomalias de inserção/atualização/exclusão e primeira forma normal.','Fixação: 10 questões identificando anomalias e violação da 1FN.'],
+['2026-11-05','theory','Aula 04 — 2FN e 3FN','Dependência funcional, dependência parcial e transitiva; critérios de 2FN e 3FN.','Fixação: 12 questões para reconhecer dependências e formas normais.'],
+['2026-11-06','theory','Aula 04 — BCNF e formas normais complementares','BCNF; noções de 4FN/5FN e decomposição sem perda, conforme o material.','Fixação: 10 questões de normalização; revisar cada alternativa errada.'],
+['2026-11-07','theory','Aula 05 — SQL: tipos, DDL e criação de tabelas','Tipos de dados; CREATE, ALTER, DROP e TRUNCATE; sintaxe de CREATE TABLE.','Fixação: 12 questões de comandos DDL e sintaxe.'],
+['2026-11-08','theory','Aula 05 — Restrições SQL','NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY, CHECK e DEFAULT.','Fixação: 15 questões sobre restrições e integridade; diferenciar PK, UNIQUE e CHECK.'],
+['2026-11-09','theory','Aula 05 — DML e consultas básicas','INSERT, UPDATE, DELETE, SELECT, DISTINCT e aliases.','Fixação: 12 questões sobre comandos e efeito de cada operação.'],
+['2026-11-10','theory','Aula 05 — WHERE e filtros','AND/OR/NOT, BETWEEN, LIKE, IN/NOT IN, IS NULL e comparação de valores.','Fixação: 15 questões de filtros; atenção à lógica booleana e NULL.'],
+['2026-11-11','theory','Aula 05 — JOINs','INNER, LEFT, RIGHT, FULL e SELF JOIN; correspondências e linhas sem par.','Fixação: 15 questões interpretando resultados de JOIN e LEFT JOIN.'],
+['2026-11-12','theory','Aula 05 — Subconsultas e EXISTS','Subconsultas, IN/NOT IN, EXISTS/NOT EXISTS e consultas correlacionadas.','Fixação: 12 questões de subconsulta e equivalência lógica.'],
+['2026-11-13','theory','Aula 05 — Agregação e agrupamento','COUNT, SUM, AVG, MIN, MAX, GROUP BY e HAVING.','Fixação: 12 questões distinguindo WHERE de HAVING e agregações.'],
+['2026-11-14','theory','Aula 05 — Ordenação, conjuntos e transações','ORDER BY, UNION/INTERSECT, COMMIT e ROLLBACK; DCL/TCL conforme o PDF.','Fixação: 12 questões sobre ordenação, conjuntos e controle transacional.'],
+['2026-11-15','theory','Aula 05 — Bateria de questões CESGRANRIO','Resolver questões da seção CESGRANRIO do PDF; priorizar SQL, JOIN, filtros e restrições.','Fixação: 20 questões da banca; registrar os erros por subtema.'],
+['2026-11-16','theory','Aula 06 — Banco de Dados em Memória','RAM, latência, throughput, cache hit/miss, persistência, snapshots, logs e replicação.','Fixação: 10 questões de conceitos e diferenças entre memória e persistência.'],
+['2026-11-17','theory','Aula 07 — Performance e otimização','Índices, custo de consultas, plano de execução e boas práticas de desempenho.','Fixação: 12 questões sobre índices e otimização de consultas.'],
+['2026-11-18','theory','Aula 08 — BI, DW, Data Lake e ETL','BI, Data Warehouse, Data Lake, ETL/ELT, dashboards e relatórios.','Fixação: 12 questões diferenciando DW, Data Lake, ETL e BI.'],
+['2026-11-19','theory','Aula 09 — Modelagem dimensional e OLAP','Fatos, dimensões, granularidade, esquema estrela/floco de neve e operações OLAP.','Fixação: 12 questões sobre fatos, dimensões, OLTP x OLAP e operações analíticas.'],
+['2026-11-20','theory','Aula 10 — Big Data','Volume, velocidade, variedade, veracidade e valor; desafios de processamento.','Fixação: 10 questões de conceitos e cenários de Big Data.'],
+['2026-11-21','theory','Aula 11 — Soluções de Big Data','Hadoop, HDFS, MapReduce e Spark; finalidade e diferenças principais.','Fixação: 12 questões relacionando ferramenta, arquitetura e finalidade.'],
+['2026-11-22','theory','Aula 12 — NoSQL: modelos e usos','Relacional x NoSQL; chave-valor, documentos, colunas e grafos; escalabilidade e flexibilidade.','Fixação: 15 questões escolhendo o modelo NoSQL adequado ao cenário.'],
+['2026-11-23','theory','Aula 13 — Qualidade de dados e dados mestres','Acurácia, completude, consistência, unicidade, padronização, dados mestres e de referência.','Fixação: 12 questões de dimensões da qualidade e gestão de dados.'],
+['2026-11-24','theory','Revisão integrada — Aulas 00 a 04','Revisar resumos e mapas; reforçar MER, modelo relacional, chaves, normalização e fundamentos.','Fixação: 25 questões mistas das Aulas 00–04, priorizando os erros.'],
+['2026-11-25','theory','Fechamento da teoria — Aulas 05 a 13','Revisão objetiva dos pontos pendentes; conferir se todos os tópicos do PDF foram estudados.','Fixação: 25 questões mistas de SQL, performance, BI, OLAP, Big Data, NoSQL e qualidade.'],
+['2026-11-26','exercise','Exercícios — Aulas 00 e 01','Somente questões: tipos de dados, informação, SGBD, arquitetura e ACID.','Meta: 25 questões; corrigir e anotar os conceitos errados.'],
+['2026-11-27','exercise','Exercícios — Aula 02 (MER)','Somente questões de DER, atributos, entidades fracas, cardinalidades e mapeamento.','Meta: 25 questões; redesenhar os DERs que causarem dúvida.'],
+['2026-11-28','exercise','Exercícios — Aula 03 (Modelo Relacional)','Somente questões de chaves, integridade, álgebra relacional e operações.','Meta: 25 questões; justificar por que cada alternativa está certa ou errada.'],
+['2026-11-29','exercise','Exercícios — Aula 04 (Normalização)','Somente questões de dependências, anomalias, 1FN, 2FN, 3FN e BCNF.','Meta: 25 questões; classificar o erro por forma normal.'],
+['2026-11-30','exercise','Exercícios — Aula 05 (SQL I)','Somente questões de DDL, DML, tipos, restrições, SELECT e filtros.','Meta: 30 questões; escrever o motivo de cada erro e rever a sintaxe.'],
+['2026-12-01','exercise','Exercícios — Aula 05 (SQL II)','Somente questões de JOIN, subconsultas, EXISTS, GROUP BY, HAVING e conjuntos.','Meta: 30 questões; prever o resultado antes de olhar as alternativas.'],
+['2026-12-02','exercise','Exercícios — Aulas 06 a 09','Somente questões de memória, índices/performance, BI, DW, ETL, modelagem dimensional e OLAP.','Meta: 25 questões; montar quadro de diferenças dos conceitos confundidos.'],
+['2026-12-03','exercise','Exercícios — Aulas 10 a 13','Somente questões de Big Data, Hadoop/Spark, NoSQL e qualidade de dados.','Meta: 25 questões; revisar modelos NoSQL e usos típicos.'],
+['2026-12-04','review','Revisão final — mapas mentais e caderno de erros','Revisar os mapas mentais anexados a cada tópico; ler somente erros recorrentes e fórmulas/regras-chave. Evitar matéria nova.','Fechamento: releitura ativa dos mapas e 10–15 questões leves apenas dos pontos frágeis.'],
+['2026-12-05','review','Assistir revisão de véspera do Estratégia','Assistir à revisão de véspera do Estratégia. Separar material, documentos e logística; não abrir conteúdo novo.','Atividade principal do dia: assistir à revisão de véspera do Estratégia.']
+];
+const dbStateKey='cariocacode.dbplanner.v1';
+function dbLoad(){try{return JSON.parse(localStorage.getItem(dbStateKey))||{done:{},exerciseDone:{}}}catch{return {done:{},exerciseDone:{}}}}
+let dbState=dbLoad();
+const dbEsc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function dbDate(s){return new Date(s+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'}).replace('.','')}
+function dbSave(){localStorage.setItem(dbStateKey,JSON.stringify(dbState));dbRender()}
+function dbRender(){
+ const filter=document.getElementById('dbFilter')?.value||'all';
+ const visible=DB_PLAN.filter(x=>filter==='all'||x[1]===filter);
+ const theory=DB_PLAN.filter(x=>x[1]==='theory'),ex=DB_PLAN.filter(x=>x[1]==='exercise');
+ document.getElementById('dbDone').textContent=`${theory.filter(x=>dbState.done[x[0]]).length}/${theory.length}`;
+ document.getElementById('dbExDone').textContent=`${ex.filter(x=>dbState.exerciseDone[x[0]]).length}/8`;
+ document.getElementById('dbMaps').textContent=Object.keys(dbState.maps||{}).length;
+ document.getElementById('dbPlanList').innerHTML=visible.map(x=>{let isTheory=x[1]==='theory',isEx=x[1]==='exercise',checked=!!(isTheory?dbState.done[x[0]]:isEx?dbState.exerciseDone[x[0]]:dbState.done[x[0]]);let map=(dbState.maps||{})[x[0]];return `<article class="review-item" style="padding:14px;background:${checked?'#f5fbf7':'white'}"><div class="review-top"><div><span class="time-tag">${dbDate(x[0])}</span> <span class="subject-tag">${isTheory?'TEORIA + FIXAÇÃO':isEx?'SOMENTE EXERCÍCIOS':'REVISÃO FINAL'}</span><strong style="display:block;margin-top:8px">${dbEsc(x[2])}</strong></div><input type="checkbox" aria-label="Concluir ${dbEsc(x[2])}" data-dbcheck="${x[0]}" ${checked?'checked':''} style="width:20px;height:20px;flex-shrink:0"></div><p><b>Conteúdo:</b> ${dbEsc(x[3])}</p><p><b>Exercícios / atividade:</b> ${dbEsc(x[4])}</p>${isTheory?`<div class="field" style="margin-top:10px"><label for="map-${x[0]}">Anexar mapa mental deste tópico (imagem ou PDF)</label><input type="file" id="map-${x[0]}" data-map="${x[0]}" accept="image/*,.pdf"><small style="font-size:10px;color:var(--muted)">${map?`Anexado: ${dbEsc(map.name)} · <a href="#" data-mapopen="${x[0]}">abrir/baixar</a> · <a href="#" data-mapremove="${x[0]}">remover</a>`:'Escolha o mapa mental feito para este tópico. O arquivo fica salvo neste navegador.'}</small></div>`:''}</article>`}).join('');
+ document.querySelectorAll('[data-dbcheck]').forEach(el=>el.onchange=()=>{let x=DB_PLAN.find(a=>a[0]===el.dataset.dbcheck);if(x[1]==='exercise')dbState.exerciseDone[x[0]]=el.checked;else dbState.done[x[0]]=el.checked;dbSave()});
+ document.querySelectorAll('[data-map]').forEach(el=>el.onchange=async()=>{const file=el.files?.[0];if(!file)return;if(file.size>1*1024*1024){alert('Para evitar limite de armazenamento do navegador, anexe arquivos de até 1 MB.');el.value='';return}const reader=new FileReader();reader.onload=()=>{dbState.maps=dbState.maps||{};dbState.maps[el.dataset.map]={name:file.name,type:file.type,data:reader.result};dbSave();toast('Mapa mental anexado ao tópico!')};reader.readAsDataURL(file)});
+ document.querySelectorAll('[data-mapopen]').forEach(a=>a.onclick=e=>{e.preventDefault();const m=dbState.maps?.[a.dataset.map];if(!m)return;const w=window.open();if(m.type.startsWith('image/'))w.document.write(`<img src="${m.data}" style="max-width:100%;height:auto">`);else{const link=w.document.createElement('a');link.href=m.data;link.download=m.name;link.textContent='Baixar '+m.name;w.document.body.appendChild(link);link.click()}});
+ document.querySelectorAll('[data-mapremove]').forEach(a=>a.onclick=e=>{e.preventDefault();if(confirm('Remover este mapa mental?')){delete dbState.maps[a.dataset.map];dbSave()}});
+}
+document.getElementById('dbFilter')?.addEventListener('change',dbRender);dbRender();
+
 const DAYS=[
  {name:"Segunda-feira",short:"SEG",tasks:[["Banco de Dados","Modelo relacional, DER e normalização","60 min"],["Banco de Dados","SQL: DDL, DML, restrições e consultas","60 min"],["Português","Interpretação de textos e questões","60 min"]]},
  {name:"Terça-feira",short:"TER",tasks:[["Engenharia de Software","Processos de software, métodos ágeis e ciclo de vida","60 min"],["Engenharia de Software","UML, testes e qualidade de software","60 min"],["Inglês","Interpretação e vocabulário técnico","60 min"]]},
@@ -103,7 +179,7 @@ const DAYS=[
  {name:"Domingo",short:"DOM",tasks:[["Banco de Dados","Questões e revisão dos erros","60 min"],["Revisão de Específicas","Engenharia de Software, projetos e BPM: questões","60 min"],["Lógica e Algoritmos","Lógica matemática, algoritmos e questões mistas","60 min"]]}
 ];
 const SUBJECTS=["Banco de Dados","Engenharia de Software","Segurança da Informação","Gerência de Projetos","Processos de Negócio (BPM)","Arquitetura e Algoritmos","Lógica e Algoritmos","Português","Inglês","Revisão de Específicas","Outra"];
-const STORE="cariocacode.study.v1";
+const STORE="devemcamadas.study.v1";
 const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const weekStart=(date=new Date())=>{const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-(d.getDay()+6)%7);return d.toISOString().slice(0,10)};
 const addDays=(iso,n)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
@@ -131,7 +207,7 @@ document.getElementById("qTotal").oninput=()=>{document.getElementById("qCorrect
 document.getElementById("errorForm").onsubmit=e=>{e.preventDefault();state.errors.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),subject:document.getElementById("eSubject").value,topic:document.getElementById("eTopic").value.trim(),why:document.getElementById("eWhy").value.trim(),fix:document.getElementById("eFix").value.trim(),date:todayISO(),done:false,note:""});e.target.reset();save();toast("Erro adicionado à lista de revisão.")};
 document.getElementById("contestForm").onsubmit=e=>{e.preventDefault();state.contest={name:document.getElementById("contestName").value.trim(),role:document.getElementById("contestRole").value.trim(),date:document.getElementById("examDate").value};save();toast("Concurso atualizado!")};
 document.getElementById("resetWeekBtn").onclick=()=>{if(confirm("Desmarcar as atividades desta semana? Seus registros de questões e erros serão mantidos.")){Object.keys(state.completed).filter(k=>k.startsWith(state.week+":")).forEach(k=>delete state.completed[k]);save();toast("Checklist semanal reiniciado.")}};
-document.getElementById("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="cariocacode-backup-"+todayISO()+".json";a.click();URL.revokeObjectURL(url);toast("Backup exportado.")};
+document.getElementById("exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="devemcamadas-backup-"+todayISO()+".json";a.click();URL.revokeObjectURL(url);toast("Backup exportado.")};
 document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
 document.getElementById("importFile").onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const imported=JSON.parse(await file.text());if(!imported||!Array.isArray(imported.records)||!Array.isArray(imported.errors)||typeof imported.completed!=="object")throw Error();if(confirm("Importar este backup e substituir os dados atuais deste navegador?")){state={...blankState(),...imported,contest:{...blankState().contest,...(imported.contest||{})}};state.week=weekStart();save();toast("Backup importado.")}}catch{alert("Não foi possível importar. Selecione um backup JSON exportado pelo Devemcamadas.")}e.target.value=""};
 document.getElementById("clearDataBtn").onclick=()=>{if(confirm("Isso apagará permanentemente os registros salvos neste navegador. Exporte um backup antes, se quiser guardá-los. Continuar?")){state=blankState();selectedDay=Math.min(6,(new Date().getDay()+6)%7);save();toast("Dados apagados.")}};
